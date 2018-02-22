@@ -1,47 +1,46 @@
-var PeopleView = (function() {
+var PetsView = (function() {
 	var dao;
 	
 	// Referencia a this que permite acceder a las funciones públicas desde las funciones de jQuery.
 	var self;
 	
-	var formId = 'people-form';
-	var listId = 'people-list';
+	var formId = 'pets-form';
+	var listId = 'pets-list';
 	var formQuery = '#' + formId;
 	var listQuery = '#' + listId;
 	
-	function PeopleView(peopleDao, formContainerId, listContainerId) {
-		dao = peopleDao;
+	function PetsView(petsDao, formContainerId, listContainerId) {
+		dao = petsDao;
 		self = this;
 		
-		insertPeopleForm($('#' + formContainerId));
-		insertPeopleList($('#' + listContainerId));
+		insertPetsForm($('#' + formContainerId));
+		insertPetsList($('#' + listContainerId));
 		
 		this.init = function() {
-			dao.listPeople(function(people) {
-				$.each(people, function(key, person) {
-					appendToTable(person);
+			dao.listPets(function(pets) {
+				$.each(pets, function(key, pet) {
+					appendToTable(pet);
 				});
 			});
 			
 			// La acción por defecto de enviar formulario (submit) se sobreescribe
 			// para que el envío sea a través de AJAX
 			$(formQuery).submit(function(event) {
-				var person = self.getPersonInForm();
+				var pet = self.getPetInForm();
 				
 				if (self.isEditing()) {
-					dao.modifyPerson(person,
-						function(person) {
-							$('#person-' + person.id + ' td.name').text(person.name);
-							$('#person-' + person.id + ' td.surname').text(person.surname);
+					dao.modifyPet(pet,
+						function(pet) {
+							$('#pet-' + pet.id + ' td.name').text(pet.name);
 							self.resetForm();
 						},
 						showErrorMessage,
 						self.enableForm
 					);
 				} else {
-					dao.addPerson(person,
-						function(person) {
-							appendToTable(person);
+					dao.addPet(pet,
+						function(pet) {
+							appendToTable(pet);
 							self.resetForm();
 						},
 						showErrorMessage,
@@ -55,48 +54,45 @@ var PeopleView = (function() {
 			$('#btnClear').click(this.resetForm);
 		};
 
-		this.getPersonInForm = function() {
+		this.getPetInForm = function() {
 			var form = $(formQuery);
 			return {
 				'id': form.find('input[name="id"]').val(),
-				'name': form.find('input[name="name"]').val(),
-				'surname': form.find('input[name="surname"]').val()
+				'name': form.find('input[name="name"]').val()
 			};
 		};
 
-		this.getPersonInRow = function(id) {
-			var row = $('#person-' + id);
+		this.getPetInRow = function(id) {
+			var row = $('#pet-' + id);
 
 			if (row !== undefined) {
 				return {
 					'id': id,
-					'name': row.find('td.name').text(),
-					'surname': row.find('td.surname').text()
+					'name': row.find('td.name').text()
 				};
 			} else {
 				return undefined;
 			}
 		};
 		
-		this.editPerson = function(id) {
-			var row = $('#person-' + id);
+		this.editPet = function(id) {
+			var row = $('#pet-' + id);
 
 			if (row !== undefined) {
 				var form = $(formQuery);
 				
 				form.find('input[name="id"]').val(id);
 				form.find('input[name="name"]').val(row.find('td.name').text());
-				form.find('input[name="surname"]').val(row.find('td.surname').text());
 				
 				$('input#btnSubmit').val('Modificar');
 			}
 		};
 		
-		this.deletePerson = function(id) {
-			if (confirm('Está a punto de eliminar a una persona. ¿Está seguro de que desea continuar?')) {
-				dao.deletePerson(id,
+		this.deletePet = function(id) {
+			if (confirm('Está a punto de eliminar a una peta. ¿Está seguro de que desea continuar?')) {
+				dao.deletePet(id,
 					function() {
-						$('tr#person-' + id).remove();
+						$('tr#pet-' + id).remove();
 					},
 					showErrorMessage
 				);
@@ -122,13 +118,12 @@ var PeopleView = (function() {
 		};
 	};
 	
-	var insertPeopleList = function(parent) {
+	var insertPetsList = function(parent) {
 		parent.append(
 			'<table id="' + listId + '" class="table">\
 				<thead>\
 					<tr class="row">\
 						<th class="col-sm-4">Nombre</th>\
-						<th class="col-sm-5">Apellido</th>\
 						<th class="col-sm-3">&nbsp;</th>\
 					</tr>\
 				</thead>\
@@ -138,18 +133,15 @@ var PeopleView = (function() {
 		);
 	};
 
-	var insertPeopleForm = function(parent) {
+	var insertPetsForm = function(parent) {
 		parent.append(
-			'<form id="' + formId + '" class="mb-5 mb-10">\
+			'<form id="' + formId + '" class="mb-6 mb-10">\
 				<input name="id" type="hidden" value=""/>\
 				<div class="row">\
-					<div class="col-sm-4">\
+					<div class="col-sm-6">\
 						<input name="name" type="text" value="" placeholder="Nombre" class="form-control" required/>\
 					</div>\
-					<div class="col-sm-4">\
-						<input name="surname" type="text" value="" placeholder="Apellido" class="form-control" required/>\
-					</div>\
-					<div class="col-sm-4">\
+					<div class="col-sm-6">\
 						<input id="btnSubmit" type="submit" value="Crear" class="btn btn-primary" />\
 						<input id="btnClear" type="reset" value="Limpiar" class="btn" />\
 					</div>\
@@ -158,13 +150,11 @@ var PeopleView = (function() {
 		);
 	};
 
-	var createPersonRow = function(person) {
-		return '<tr id="person-'+ person.id +'" class="row">\
-			<td class="name col-sm-4">' + person.name + '</td>\
-			<td class="surname col-sm-4">' + person.surname + '</td>\
-			<td class="col-sm-4">\
+	var createPetRow = function(pet) {
+		return '<tr id="pet-'+ pet.id +'" class="row">\
+			<td class="name col-sm-6 ">' + pet.name + '</td>\
+			<td class="col-sm-6">\
 				<a class="edit btn btn-primary" href="#">Editar</a>\
-				<a class="edit btn btn-primary" href="pets.html">Ver Mascotas</a>\
 				<a class="delete btn btn-warning" href="#">Eliminar</a>\
 			</td>\
 		</tr>';
@@ -174,21 +164,21 @@ var PeopleView = (function() {
 		alert(textStatus + ": " + error);
 	};
 
-	var addRowListeners = function(person) {
-		$('#person-' + person.id + ' a.edit').click(function() {
-			self.editPerson(person.id);
+	var addRowListeners = function(pet) {
+		$('#pet-' + pet.id + ' a.edit').click(function() {
+			self.editPet(pet.id);
 		});
 		
-		$('#person-' + person.id + ' a.delete').click(function() {
-			self.deletePerson(person.id);
+		$('#pet-' + pet.id + ' a.delete').click(function() {
+			self.deletePet(pet.id);
 		});
 	};
 
-	var appendToTable = function(person) {
+	var appendToTable = function(pet) {
 		$(listQuery + ' > tbody:last')
-			.append(createPersonRow(person));
-		addRowListeners(person);
+			.append(createPetRow(pet));
+		addRowListeners(pet);
 	};
 	
-	return PeopleView;
+	return PetsView;
 })();
