@@ -141,8 +141,8 @@ public class PetsDAO extends DAO {
 			
 			try (PreparedStatement statement = conn.prepareStatement(query)) {
 				statement.setString(1, pet.getName());
-				statement.setInt(3, pet.getId());
-				
+				statement.setInt(2, pet.getId());
+							
 				if (statement.executeUpdate() != 1) {
 					throw new IllegalArgumentException("name can't be null");
 				}
