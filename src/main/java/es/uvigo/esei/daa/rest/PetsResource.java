@@ -23,7 +23,7 @@ import es.uvigo.esei.daa.entities.Pet;
  * 
  * @author Jonatan Iglesias Belmonte.
  */
-@Path("/people/pets/")
+@Path("/people/{ownerId}/pets/")
 @Produces(MediaType.APPLICATION_JSON)
 public class PetsResource {
 	private final static Logger LOG = Logger.getLogger(PetsResource.class.getName());
@@ -53,12 +53,13 @@ public class PetsResource {
 	 * error message will be returned.
 	 */
 	@GET
-	@Path("/{id}")
+	@Path("{petId}")
 	public Response get(
-		@PathParam("id") int id
+		@PathParam("ownerId") int ownerId,
+		@PathParam("petId") int petId
 	) {
 		try {
-			final Pet pet = this.dao.get(id);
+			final Pet pet = this.dao.get(petId,ownerId);
 			
 			return Response.ok(pet).build();
 		} catch (IllegalArgumentException iae) {
@@ -84,9 +85,12 @@ public class PetsResource {
 	 * Server Error response with an error message will be returned.
 	 */
 	@GET
-	public Response list() {
+	public Response list(
+			@PathParam("ownerId") int ownerId
+	) {
+		
 		try {
-			return Response.ok(this.dao.list()).build();
+			return Response.ok(this.dao.list(ownerId)).build();
 		} catch (DAOException e) {
 			LOG.log(Level.SEVERE, "Error listing people", e);
 			return Response.serverError().entity(e.getMessage()).build();
@@ -106,10 +110,11 @@ public class PetsResource {
 	 */
 	@POST
 	public Response add(
-		@FormParam("name") String name
+		@FormParam("name") String name,
+		@PathParam("ownerId") int ownerId
 	) {
 		try {
-			final Pet newPet = this.dao.add(name);
+			final Pet newPet = this.dao.add(name,ownerId);
 			
 			return Response.ok(newPet).build();
 		} catch (IllegalArgumentException iae) {
@@ -140,13 +145,13 @@ public class PetsResource {
 	 * Server Error response with an error message will be returned.
 	 */
 	@PUT
-	@Path("/{id}")
+	@Path("/{petId}")
 	public Response modify(
-		@PathParam("id") int id, 
+		@PathParam("petId") int petId, 
 		@FormParam("name") String name
 	) {
 		try {
-			final Pet modifiedPet = new Pet(id, name);
+			final Pet modifiedPet = new Pet(petId, name);
 			this.dao.modify(modifiedPet);
 			
 			return Response.ok(modifiedPet).build();
@@ -184,14 +189,14 @@ public class PetsResource {
 	 * with an error message will be returned.
 	 */
 	@DELETE
-	@Path("/{id}")
+	@Path("/{petId}")
 	public Response delete(
-		@PathParam("id") int id
+		@PathParam("petId") int petId
 	) {
 		try {
-			this.dao.delete(id);
+			this.dao.delete(petId);
 			
-			return Response.ok(id).build();
+			return Response.ok(petId).build();
 		} catch (IllegalArgumentException iae) {
 			LOG.log(Level.FINE, "Invalid pet id in delete method", iae);
 			

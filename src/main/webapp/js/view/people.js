@@ -4,8 +4,8 @@ var PeopleView = (function() {
 	// Referencia a this que permite acceder a las funciones públicas desde las funciones de jQuery.
 	var self;
 	
-	var formId = 'people-form';
-	var listId = 'people-list';
+	var formId = 'main-people';
+	var listId = 'main-list';
 	var formQuery = '#' + formId;
 	var listQuery = '#' + listId;
 	
@@ -17,6 +17,7 @@ var PeopleView = (function() {
 		insertPeopleList($('#' + listContainerId));
 		
 		this.init = function() {
+			
 			dao.listPeople(function(people) {
 				$.each(people, function(key, person) {
 					appendToTable(person);
@@ -102,6 +103,17 @@ var PeopleView = (function() {
 				);
 			}
 		};
+		
+		this.showPets = function(id) {
+			$('#main-container').empty();
+			$('#main-container div').empty();
+			$(document).ready(function() {
+				var view = new PetsView(new PetsDAO(id), 'main-container', 'main-container');
+				
+				view.init();
+				
+			});
+		};
 
 		this.isEditing = function() {
 			return $(formQuery + ' input[name="id"]').val() != "";
@@ -140,7 +152,9 @@ var PeopleView = (function() {
 
 	var insertPeopleForm = function(parent) {
 		parent.append(
-			'<form id="' + formId + '" class="mb-5 mb-10">\
+				
+			'<h1 class="display-5 mt-3 mb-3">Personas</h1>\
+				<form id="' + formId + '" class="mb-5 mb-10">\
 				<input name="id" type="hidden" value=""/>\
 				<div class="row">\
 					<div class="col-sm-4">\
@@ -163,8 +177,8 @@ var PeopleView = (function() {
 			<td class="name col-sm-4">' + person.name + '</td>\
 			<td class="surname col-sm-4">' + person.surname + '</td>\
 			<td class="col-sm-4">\
+				<a class="show btn btn-primary" href="#">Ver Mascotas</a>\
 				<a class="edit btn btn-primary" href="#">Editar</a>\
-				<a class="edit btn btn-primary" href="pets.html">Ver Mascotas</a>\
 				<a class="delete btn btn-warning" href="#">Eliminar</a>\
 			</td>\
 		</tr>';
@@ -175,6 +189,10 @@ var PeopleView = (function() {
 	};
 
 	var addRowListeners = function(person) {
+		$('#person-' + person.id + ' a.show').click(function() {
+			self.showPets(person.id);
+		});
+		
 		$('#person-' + person.id + ' a.edit').click(function() {
 			self.editPerson(person.id);
 		});
@@ -182,6 +200,8 @@ var PeopleView = (function() {
 		$('#person-' + person.id + ' a.delete').click(function() {
 			self.deletePerson(person.id);
 		});
+		
+		
 	};
 
 	var appendToTable = function(person) {

@@ -4,8 +4,8 @@ var PetsView = (function() {
 	// Referencia a this que permite acceder a las funciones públicas desde las funciones de jQuery.
 	var self;
 	
-	var formId = 'pets-form';
-	var listId = 'pets-list';
+	var formId = 'main-form';
+	var listId = 'main-list';
 	var formQuery = '#' + formId;
 	var listQuery = '#' + listId;
 	
@@ -17,6 +17,7 @@ var PetsView = (function() {
 		insertPetsList($('#' + listContainerId));
 		
 		this.init = function() {
+			
 			dao.listPets(function(pets) {
 				$.each(pets, function(key, pet) {
 					appendToTable(pet);
@@ -98,6 +99,17 @@ var PetsView = (function() {
 				);
 			}
 		};
+		
+		this.back = function() {
+			$('#main-container').empty();
+			$('#main-container div').empty();
+			$(document).ready(function() {
+				var view = new PeopleView(new PeopleDAO(), 'main-container', 'main-container');
+				
+				view.init();
+				
+			});
+		};
 
 		this.isEditing = function() {
 			return $(formQuery + ' input[name="id"]').val() != "";
@@ -135,7 +147,9 @@ var PetsView = (function() {
 
 	var insertPetsForm = function(parent) {
 		parent.append(
-			'<form id="' + formId + '" class="mb-6 mb-10">\
+			'<br/><a class="back btn btn-info href="#">Atrás</a>\
+				<h1 class="display-5 mt-3 mb-3">Mascotas</h1>\
+				<form id="' + formId + '" class="mb-6 mb-10">\
 				<input name="id" type="hidden" value=""/>\
 				<div class="row">\
 					<div class="col-sm-6">\
@@ -171,6 +185,10 @@ var PetsView = (function() {
 		
 		$('#pet-' + pet.id + ' a.delete').click(function() {
 			self.deletePet(pet.id);
+		});
+		
+		$('a.back').click(function() {
+			self.back();
 		});
 	};
 

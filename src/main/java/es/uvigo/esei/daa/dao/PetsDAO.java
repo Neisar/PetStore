@@ -30,13 +30,14 @@ public class PetsDAO extends DAO {
 	 * @throws IllegalArgumentException if the provided id does not corresponds
 	 * with any persisted pet.
 	 */
-	public Pet get(int id)
+	public Pet get(int petId, int ownerId)
 	throws DAOException, IllegalArgumentException {
 		try (final Connection conn = this.getConnection()) {
-			final String query = "SELECT * FROM pets WHERE id=?";
+			final String query = "SELECT * FROM pets WHERE petId=? AND ownerId=?";
 			
 			try (final PreparedStatement statement = conn.prepareStatement(query)) {
-				statement.setInt(1, id);
+				statement.setInt(1, petId);
+				statement.setInt(2, ownerId);
 				
 				try (final ResultSet result = statement.executeQuery()) {
 					if (result.next()) {
@@ -58,11 +59,12 @@ public class PetsDAO extends DAO {
 	 * @return a list with all the pets persisted in the system.
 	 * @throws DAOException if an error happens while retrieving the pets.
 	 */
-	public List<Pet> list() throws DAOException {
+	public List<Pet> list(int ownerId) throws DAOException {
 		try (final Connection conn = this.getConnection()) {
-			final String query = "SELECT * FROM pets";
+			final String query = "SELECT * FROM pets WHERE ownerId=?";
 			
 			try (final PreparedStatement statement = conn.prepareStatement(query)) {
+				statement.setInt(1, ownerId);
 				try (final ResultSet result = statement.executeQuery()) {
 					final List<Pet> pets = new LinkedList<>();
 					
@@ -89,17 +91,18 @@ public class PetsDAO extends DAO {
 	 * @throws DAOException if an error happens while persisting the new pet.
 	 * @throws IllegalArgumentException if the name or surname are {@code null}.
 	 */
-	public Pet add(String name)
+	public Pet add(String name, int ownerId)
 	throws DAOException, IllegalArgumentException {
 		if (name == null) {
 			throw new IllegalArgumentException("name can't be null");
 		}
 		
 		try (Connection conn = this.getConnection()) {
-			final String query = "INSERT INTO pets VALUES(null,?,3)";
+			final String query = "INSERT INTO pets VALUES(null,?,?)";
 			
 			try (PreparedStatement statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 				statement.setString(1, name);
+				statement.setInt(2, ownerId);
 				
 				if (statement.executeUpdate() == 1) {
 					try (ResultSet resultKeys = statement.getGeneratedKeys()) {

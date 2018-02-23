@@ -1,5 +1,5 @@
 var PetsDAO = (function() {
-	var resourcePath = "rest/people/pets/";
+	var resourcePath;
 	var requestByAjax = function(data, done, fail, always) {
 		done = typeof done !== 'undefined' ? done : function() {};
 		fail = typeof fail !== 'undefined' ? fail : function() {};
@@ -11,7 +11,9 @@ var PetsDAO = (function() {
 			.always(always);
 	};
 	
-	function PetsDAO() {
+	function PetsDAO(ownerId) {
+		resourcePath = "rest/people/"+ownerId+"/pets/";
+		
 		this.listPets = function(done, fail, always) {
 			requestByAjax({
 				url: resourcePath,

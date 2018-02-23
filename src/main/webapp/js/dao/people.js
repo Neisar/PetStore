@@ -41,6 +41,13 @@ var PeopleDAO = (function() {
 				type: 'DELETE',
 			}, done, fail, always);
 		};
+		
+		this.showPets = function(id, done, fail, always) {
+			requestByAjax({
+				url: resourcePath + id,
+				type: 'GET'
+			}, done, fail, always);
+		};
 	}
 	
 	return PeopleDAO;

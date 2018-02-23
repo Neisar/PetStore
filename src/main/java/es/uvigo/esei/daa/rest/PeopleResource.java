@@ -76,6 +76,7 @@ public class PeopleResource {
 		}
 	}
 
+
 	/**
 	 * Returns the complete list of people stored in the system.
 	 * 
